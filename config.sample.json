@@ -1,5 +1,5 @@
 {
     "username": "CHANGEME",
     "password": "CHANGEME",
-    "endpoint": "CHANGEME"
+    "endpoint": "http://CHANGEME.com/wp-json"
 }

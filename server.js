@@ -3,6 +3,7 @@ const port = 3001;
 var WPAPI = require( 'wpapi' );
 
 const config = require('./config.json');
+const filePath = './images/my_picture.jpg';
 
 var wp = new WPAPI({
     endpoint,
@@ -11,19 +12,33 @@ var wp = new WPAPI({
     auth
 } = config);
 
-var io = require('socket.io')(port);
-var redis = require('socket.io-redis');
-io.adapter(redis({ host: 'localhost', port: 6379 }));
+const redis = require('redis');
+const client = redis.createClient({
+	"host": "127.0.0.1",
+	"port": 6379,
+	"auth_pass": ""
+});
 
-const filePath = './images/owl.jpg';
+client.subscribe("WordPress published new post");
 
-io.on('connection', function(socket) {
-	console.log('connected to the server');
+client.on("message", function(channel, message){
+	const { id, post, update, $_POST } = JSON.parse(message);
 
-  	socket.on('browser published new post', function(id, post, update) {
-  		console.log('update post');
-   		addFeaturedImageToPost(id, socket);
-  	});
+	// if the form has been submitted by API the $_POST will not contain data
+	// This will prevent an infinite loop when save_post gets fired every time
+	// either the API or browser editor saves the post.
+	if ($_POST.length < 1) {
+		return;
+	}
+
+	if (update === true) {
+		// console.log('updated');
+		// console.log(addFeaturedImageToPost(id));
+
+		const added = addFeaturedImageToPost(id);
+	} else {
+		console.log('not updated');
+	}
 });
 
 

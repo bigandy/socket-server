@@ -22,12 +22,12 @@ const client = redis.createClient({
 client.subscribe("WordPress published new post");
 
 client.on("message", function(channel, message){
-	const { id, post, update, $_POST } = JSON.parse(message);
+	const { id, post, update, viaAPI } = JSON.parse(message);
 
-	// if the form has been submitted by API the $_POST will not contain data
+	// if the form has been submitted by API the viaAPI will be true
 	// This will prevent an infinite loop when save_post gets fired every time
 	// either the API or browser editor saves the post.
-	if ($_POST.length < 1) {
+	if (viaAPI) {
 		return;
 	}
 
